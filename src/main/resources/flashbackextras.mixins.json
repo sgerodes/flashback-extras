@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "io.serge.flashbackextras.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "AudioKeyframeMixin",
+    "AudioKeyframeTypeMixin",
+    "EditorStateMixin",
+    "KeyframeChangePlayAudioMixin",
+    "ReplayUIMixin",
+    "SoundManagerAccessor",
+    "TimelineWindowMixin",
+    "TimelineWindowAudioMixin",
+    "StartExportWindowMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

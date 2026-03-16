@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "flashbackextras",
+  "version": "${version}",
+  "name": "Flashback Extras",
+  "description": "Small focused add-ons for the Flashback replay editor.",
+  "authors": [
+    "Serge"
+  ],
+  "contact": {
+    "homepage": "https://github.com/${github_repo}",
+    "sources": "https://github.com/${github_repo}",
+    "issues": "https://github.com/${github_repo}/issues"
+  },
+  "license": "All Rights Reserved",
+  "environment": "client",
+  "icon": "assets/flashbackextras/icon.png",
+  "entrypoints": {
+    "client": [
+      "io.serge.flashbackextras.FlashbackExtras"
+    ],
+    "modmenu": [
+      "io.serge.flashbackextras.compat.ModMenuCompat"
+    ]
+  },
+  "mixins": [
+    "flashbackextras.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.2",
+    "minecraft": ">=1.21.11",
+    "java": ">=21",
+    "fabric-api": ">=0.140.2+1.21.11",
+    "flashback": ">=0.39.1"
+  },
+  "suggests": {
+    "modmenu": "*"
+  },
+  "custom": {
+    "mc-publish": {
+      "loaders": [
+        "fabric"
+      ]
+    }
+  }
+}

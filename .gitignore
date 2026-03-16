@@ -1,0 +1,29 @@
+# Gradle
+.gradle/
+.gradle-user-home/
+build/
+out/
+
+# Loom / dev runtime
+run/
+logs/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# Java
+hs_err_pid*
+replay_pid*
+*.log
+
+# Local notes / scratch
+ignore/
