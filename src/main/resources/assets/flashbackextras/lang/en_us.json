@@ -1,10 +1,10 @@
 {
   "modmenu.nameTranslation.flashbackextras": "Flashback Extras",
-  "modmenu.descriptionTranslation.flashbackextras": "Small focused add-ons for the Flashback replay editor.",
+  "modmenu.descriptionTranslation.flashbackextras": "Additional features and fixes for the Flashback replay editor.",
   "key.category.flashbackextras.keybind": "Flashback Extras",
   "flashbackextras.keybind.open_menu": "Open Flashback Extras Menu",
   "flashbackextras.config.title": "Flashback Extras",
-  "flashbackextras.config.subtitle": "Extra tools for Flashback.",
+  "flashbackextras.config.subtitle": "Features and fixes for Flashback.",
   "flashbackextras.config.hover_hint": "Hover a toggle to see what it does.",
   "flashbackextras.tab.features": "Features",
   "flashbackextras.tab.fixes": "Fixes",

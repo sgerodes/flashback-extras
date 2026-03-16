@@ -1,9 +1,7 @@
 # Flashback Extras
 
-Flashback Extras is a mod for the Flashback replay editor with features that enhance the editing experience.
+Flashback Extras extends the Flashback replay editor with additional features and fixes.
 All features can be toggled on or off.
-
-This mod is not from the Flashback creators. It adds things that felt missing when I started editing.
 
 ## Features
 - `Export Presets`
