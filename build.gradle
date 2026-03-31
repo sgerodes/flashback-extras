@@ -80,6 +80,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+def mcTaggedVersion = "${project.version}-MC${project.minecraft_version}"
+
+tasks.matching { it.name in ['remapJar', 'sourcesJar', 'remapSourcesJar'] }.configureEach {
+    archiveVersion = mcTaggedVersion
+}
+
 test {
     useJUnitPlatform()
 }
