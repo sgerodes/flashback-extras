@@ -6,7 +6,7 @@ import io.serge.flashbackextras.export.ExportCapabilityWarmup;
 import io.serge.flashbackextras.screen.FlashbackExtrasConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
@@ -21,7 +21,7 @@ public final class FlashbackExtras implements ClientModInitializer {
         Identifier.fromNamespaceAndPath(MOD_ID, "keybind")
     );
 
-    private static final KeyMapping OPEN_MENU_KEYBIND = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+    private static final KeyMapping OPEN_MENU_KEYBIND = KeyMappingHelper.registerKeyMapping(new KeyMapping(
         "flashbackextras.keybind.open_menu",
         InputConstants.Type.KEYSYM,
         GLFW.GLFW_KEY_P,

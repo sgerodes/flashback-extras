@@ -1,7 +1,7 @@
 package io.serge.flashbackextras.screen;
 
 import io.serge.flashbackextras.config.FlashbackExtrasConfig;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -102,7 +102,7 @@ public final class FlashbackExtrasConfigScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         int centerX = this.width / 2;
         int panelWidth = 296;
         int panelLeft = centerX - panelWidth / 2;
@@ -116,18 +116,12 @@ public final class FlashbackExtrasConfigScreen extends Screen {
         guiGraphics.fill(panelLeft, panelTop, panelLeft + 1, panelBottom, 0xFF6A6A6A);
         guiGraphics.fill(panelLeft + panelWidth - 1, panelTop, panelLeft + panelWidth, panelBottom, 0xFF6A6A6A);
 
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.drawCenteredString(this.font, this.title, centerX, 20, 0xFFFFFF);
-        guiGraphics.drawCenteredString(this.font,
-            Component.translatable("flashbackextras.config.subtitle"),
-            centerX, 34, 0xA0A0A0);
-        guiGraphics.drawCenteredString(this.font,
+        guiGraphics.centeredText(this.font, this.title, centerX, 20, 0xFFFFFFFF);
+        guiGraphics.centeredText(this.font,
             Component.translatable(this.tab == Tab.FEATURES ? "flashbackextras.tab.features" : "flashbackextras.tab.fixes"),
-            centerX, panelTop + 8, 0xFFFFFF);
-        guiGraphics.drawCenteredString(this.font,
-            Component.translatable("flashbackextras.config.hover_hint"),
-            centerX, panelTop + 20, 0x8E8E8E);
+            centerX, panelTop + 8, 0xFFFFFFFF);
     }
 
     private enum Tab {

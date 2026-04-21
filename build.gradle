@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.14-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -21,36 +21,35 @@ repositories {
     mavenLocal()
 }
 
-def useLocalFlashbackJar = providers.gradleProperty('flashback.useLocalJar')
-    .map { it.toBoolean() }
-    .orElse(false)
-    .get()
-
 def flashbackJar = fileTree('../Flashback/build/libs') {
     include 'flashback-*.jar'
     exclude 'flashback-*-sources.jar'
 }.files.sort { a, b -> a.name <=> b.name }.last()
 
+def useLocalFlashbackJar = providers.gradleProperty('flashback.useLocalJar')
+    .map { it.toBoolean() }
+    .orElse(flashbackJar != null)
+    .get()
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modCompileOnly "maven.modrinth:modmenu:xhN1IvHi"
+    compileOnly "maven.modrinth:modmenu:jvjwXH6l"
+    compileOnly files('../Flashback/deps/imgui-binding-1.90.0.jar')
+    compileOnly files('../Flashback/deps/imgui-natives.jar')
 
     if (useLocalFlashbackJar) {
         if (flashbackJar == null) {
             throw new GradleException('Could not find a built Flashback jar in ../Flashback/build/libs. Build Flashback first or omit -Pflashback.useLocalJar=true.')
         }
 
-        modCompileOnly files(flashbackJar)
-        modLocalRuntime files(flashbackJar)
-        testRuntimeOnly files(flashbackJar)
+        compileOnly files(flashbackJar)
+        testImplementation files(flashbackJar)
     } else {
-        modCompileOnly "maven.modrinth:flashback:${project.flashback_version}"
-        modLocalRuntime "maven.modrinth:flashback:${project.flashback_version}"
-        testRuntimeOnly "maven.modrinth:flashback:${project.flashback_version}"
+        compileOnly "maven.modrinth:flashback:${project.flashback_version}"
+        testImplementation "maven.modrinth:flashback:${project.flashback_version}"
     }
 
     testImplementation platform('org.junit:junit-bom:5.13.4')
@@ -71,18 +70,19 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 21
+    it.options.release = 25
 }
 
 java {
     withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
-def mcTaggedVersion = "${project.version}-MC${project.minecraft_version}"
+def mcVersionTag = (project.findProperty('mc_version_tag') ?: project.minecraft_version).toString()
+def mcTaggedVersion = "${project.version}-MC${mcVersionTag}"
 
-tasks.matching { it.name in ['remapJar', 'sourcesJar', 'remapSourcesJar'] }.configureEach {
+tasks.matching { it.name in ['jar', 'remapJar', 'sourcesJar', 'remapSourcesJar'] }.configureEach {
     archiveVersion = mcTaggedVersion
 }
 
