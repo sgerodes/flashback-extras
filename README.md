@@ -17,6 +17,9 @@ All features can be toggled on or off.
 
 <img src="docs/images/export-preview-overlay-yt-shorts.png" alt="Export preview overlay for YouTube Shorts" width="700">
 
+- `Render Segments`
+  Adds a segment lane to the timeline so you can mark the parts of a replay that should be rendered. The export menu can render those ranges as separate numbered clips or as one stitched video.
+
 - `Timeline Horizontal Scroll`
   Enables horizontal scrolling of the Flashback timeline with a mouse side wheel, horizontal wheel, or trackpad.
 

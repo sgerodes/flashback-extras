@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import io.serge.flashbackextras.FlashbackExtras;
 import io.serge.flashbackextras.export.ExportCapabilityWarmup;
 import io.serge.flashbackextras.export.ExportPreset;
+import io.serge.flashbackextras.segment.RenderSegmentStore;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.IOException;
@@ -14,7 +15,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public final class FlashbackExtrasConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -36,6 +40,9 @@ public final class FlashbackExtrasConfig {
             data = loaded != null ? loaded : new Data();
             if (data.exportPresets == null) {
                 data.exportPresets = new ArrayList<>();
+            }
+            if (data.renderSegmentsByReplay == null) {
+                data.renderSegmentsByReplay = new HashMap<>();
             }
         } catch (Exception e) {
             FlashbackExtras.LOGGER.error("Failed to load config from {}", PATH, e);
@@ -81,6 +88,15 @@ public final class FlashbackExtrasConfig {
         save();
     }
 
+    public static boolean isRenderSegmentsEnabled() {
+        return data.renderSegmentsEnabled;
+    }
+
+    public static void setRenderSegmentsEnabled(boolean enabled) {
+        data.renderSegmentsEnabled = enabled;
+        save();
+    }
+
     public static boolean isAudioTimelineFixesEnabled() {
         return data.audioTimelineFixesEnabled;
     }
@@ -122,12 +138,23 @@ public final class FlashbackExtrasConfig {
         save();
     }
 
+    public static RenderSegmentStore getRenderSegmentStore(UUID replayUuid) {
+        RenderSegmentStore store = data.renderSegmentsByReplay.computeIfAbsent(replayUuid.toString(), ignored -> new RenderSegmentStore());
+        return store;
+    }
+
+    public static void saveRenderSegments() {
+        save();
+    }
+
     private static final class Data {
         private boolean timelineHorizontalScroll = true;
         private boolean exportPresetsEnabled = true;
         private boolean exportCropGuideEnabled = true;
+        private boolean renderSegmentsEnabled = true;
         private boolean audioTimelineFixesEnabled = true;
         private boolean exportWarmupEnabled = true;
         private List<ExportPreset> exportPresets = new ArrayList<>();
+        private Map<String, RenderSegmentStore> renderSegmentsByReplay = new HashMap<>();
     }
 }

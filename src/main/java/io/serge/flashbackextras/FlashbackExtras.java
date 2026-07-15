@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.serge.flashbackextras.config.FlashbackExtrasConfig;
 import io.serge.flashbackextras.export.ExportCapabilityWarmup;
 import io.serge.flashbackextras.screen.FlashbackExtrasConfigScreen;
+import io.serge.flashbackextras.segment.RenderSegmentExportCoordinator;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -34,6 +35,8 @@ public final class FlashbackExtras implements ClientModInitializer {
         ExportCapabilityWarmup.initialize();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            RenderSegmentExportCoordinator.tick();
+
             while (OPEN_MENU_KEYBIND.consumeClick()) {
                 long window = client.getWindow().handle();
                 boolean rightAltDown = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_RIGHT_ALT) == GLFW.GLFW_PRESS;

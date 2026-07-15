@@ -1,5 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom' version '1.15.5'
     id 'maven-publish'
 }
 
@@ -37,6 +37,7 @@ dependencies {
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     compileOnly "maven.modrinth:modmenu:jvjwXH6l"
+    compileOnly 'org.bytedeco:javacv:1.5.10'
     compileOnly files('../Flashback/deps/imgui-binding-1.90.0.jar')
     compileOnly files('../Flashback/deps/imgui-natives.jar')
 
@@ -54,6 +55,7 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.13.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.bytedeco:javacv:1.5.10'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

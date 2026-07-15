@@ -59,6 +59,11 @@ public final class FlashbackExtrasConfigScreen extends Screen {
                 "flashbackextras.option.export_crop_guide.description",
                 FlashbackExtrasConfig.isExportCropGuideEnabled(),
                 FlashbackExtrasConfig::setExportCropGuideEnabled);
+            this.addToggleRow(left, y + 78,
+                "flashbackextras.option.render_segments",
+                "flashbackextras.option.render_segments.description",
+                FlashbackExtrasConfig.isRenderSegmentsEnabled(),
+                FlashbackExtrasConfig::setRenderSegmentsEnabled);
         } else {
             this.addToggleRow(left, y,
                 "flashbackextras.option.audio_timeline_fixes",
@@ -107,7 +112,7 @@ public final class FlashbackExtrasConfigScreen extends Screen {
         int panelWidth = 296;
         int panelLeft = centerX - panelWidth / 2;
         int panelTop = this.height / 4 - 8;
-        int panelBottom = panelTop + (this.tab == Tab.FEATURES ? 124 : 98);
+        int panelBottom = panelTop + (this.tab == Tab.FEATURES ? 150 : 98);
 
         guiGraphics.fill(0, 0, this.width, this.height, 0x55101010);
         guiGraphics.fill(panelLeft, panelTop, panelLeft + panelWidth, panelBottom, 0xCC101010);

@@ -1,16 +1,25 @@
 package io.serge.flashbackextras.mixin;
 
 import com.moulberry.flashback.Flashback;
+import com.moulberry.flashback.Utils;
+import com.moulberry.flashback.combo_options.VideoContainer;
 import com.moulberry.flashback.configuration.FlashbackConfigV1;
 import com.moulberry.flashback.editor.ui.ImGuiHelper;
 import com.moulberry.flashback.editor.ui.windows.StartExportWindow;
+import com.moulberry.flashback.exporting.ExportSettings;
+import com.moulberry.flashback.playback.ReplayServer;
 import imgui.moulberry90.ImGui;
 import imgui.moulberry90.type.ImString;
 import io.serge.flashbackextras.config.FlashbackExtrasConfig;
 import io.serge.flashbackextras.export.ExportCapabilityWarmup;
 import io.serge.flashbackextras.export.ExportCapabilityWarmup.Status;
 import io.serge.flashbackextras.export.ExportPreset;
+import io.serge.flashbackextras.segment.RenderSegment;
+import io.serge.flashbackextras.segment.RenderSegmentExportCoordinator;
+import io.serge.flashbackextras.segment.RenderSegmentExportMode;
+import io.serge.flashbackextras.segment.RenderSegmentStore;
 import net.minecraft.client.resources.language.I18n;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,11 +29,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(value = StartExportWindow.class, remap = false)
 public abstract class StartExportWindowMixin {
     @Shadow @Final private static ImString bitrate;
     @Shadow @Final private static ImString pngSequenceFormat;
+    @Shadow private static boolean close;
+
+    @Shadow
+    private static CompletableFuture<ExportSettings> createExportSettings(@Nullable String name, FlashbackConfigV1 config) {
+        throw new AssertionError();
+    }
 
     @Unique private static final int[] flashbackExtras$selectedPreset = new int[]{-1};
     @Unique private static final ImString flashbackExtras$presetName = ImGuiHelper.createResizableImString("");
@@ -42,11 +58,15 @@ public abstract class StartExportWindowMixin {
         )
     )
     private static void flashbackExtras$renderExportPresets(CallbackInfo ci) {
-        if (!FlashbackExtrasConfig.isExportPresetsEnabled()) {
-            return;
-        }
-
         FlashbackConfigV1 config = Flashback.getConfig();
+        if (FlashbackExtrasConfig.isExportPresetsEnabled()) {
+            flashbackExtras$renderExportPresets(config);
+        }
+        flashbackExtras$renderRenderSegments(config);
+    }
+
+    @Unique
+    private static void flashbackExtras$renderExportPresets(FlashbackConfigV1 config) {
         List<ExportPreset> presets = FlashbackExtrasConfig.getAllExportPresets();
         if (flashbackExtras$selectedPreset[0] >= presets.size()) {
             flashbackExtras$selectedPreset[0] = presets.size() - 1;
@@ -166,6 +186,100 @@ public abstract class StartExportWindowMixin {
                 }
             }
         );
+    }
+
+    @Unique
+    private static void flashbackExtras$renderRenderSegments(FlashbackConfigV1 config) {
+        if (!FlashbackExtrasConfig.isRenderSegmentsEnabled()) {
+            return;
+        }
+
+        ReplayServer replayServer = Flashback.getReplayServer();
+        if (replayServer == null) {
+            return;
+        }
+
+        RenderSegmentStore store = FlashbackExtrasConfig.getRenderSegmentStore(replayServer.getMetadata().replayIdentifier);
+        store.normalize(replayServer.getTotalReplayTicks());
+        List<RenderSegment> segments = store.segments();
+        RenderSegmentExportMode mode = store.lastExportMode();
+
+        ImGuiHelper.separatorWithText(I18n.get("flashbackextras.render_segments.title"));
+
+        RenderSegmentExportMode[] modes = RenderSegmentExportMode.values();
+        String[] modeNames = new String[modes.length];
+        for (int i = 0; i < modes.length; i++) {
+            modeNames[i] = modes[i].displayName();
+        }
+
+        int[] selectedMode = new int[]{mode.ordinal()};
+        ImGui.setNextItemWidth(ImGui.getContentRegionAvailX());
+        if (ImGuiHelper.combo(I18n.get("flashbackextras.render_segments.mode"), selectedMode, modeNames)) {
+            store.setLastExportMode(modes[selectedMode[0]]);
+            FlashbackExtrasConfig.saveRenderSegments();
+            mode = store.lastExportMode();
+        }
+
+        if (segments.isEmpty()) {
+            ImGui.textDisabled(I18n.get("flashbackextras.render_segments.none"));
+            return;
+        }
+
+        String duration = Utils.timeInSecondsToString(Math.max(1, store.totalDurationTicks() / 20));
+        ImGui.textDisabled(I18n.get("flashbackextras.render_segments.summary", segments.size(), duration));
+
+        if (mode == RenderSegmentExportMode.NORMAL) {
+            return;
+        }
+
+        boolean stitchedPngDisabled = mode == RenderSegmentExportMode.STITCHED_VIDEO
+            && config.internalExport.container == VideoContainer.PNG_SEQUENCE;
+        boolean stitchBusy = mode == RenderSegmentExportMode.STITCHED_VIDEO
+            && RenderSegmentExportCoordinator.isStitchingBusy();
+        boolean disabled = stitchedPngDisabled || stitchBusy;
+
+        if (disabled) {
+            ImGui.beginDisabled();
+        }
+        float buttonSize = (ImGui.getContentRegionAvailX() - ImGui.getStyle().getItemSpacingX()) / 2f;
+        if (ImGui.button(I18n.get("flashbackextras.render_segments.export"), buttonSize, 0)) {
+            flashbackExtras$createRenderSegmentJobs(config, mode, segments, true);
+        }
+        ImGui.sameLine();
+        if (ImGui.button(I18n.get("flashbackextras.render_segments.queue"), buttonSize, 0)) {
+            flashbackExtras$createRenderSegmentJobs(config, mode, segments, false);
+        }
+        if (disabled) {
+            ImGui.endDisabled();
+            if (stitchedPngDisabled) {
+                ImGuiHelper.tooltip(I18n.get("flashbackextras.render_segments.stitched_png_disabled"));
+            } else if (stitchBusy) {
+                ImGuiHelper.tooltip(I18n.get("flashbackextras.render_segments.stitch_busy"));
+            }
+        }
+    }
+
+    @Unique
+    private static void flashbackExtras$createRenderSegmentJobs(FlashbackConfigV1 config, RenderSegmentExportMode mode,
+                                                               List<RenderSegment> segments, boolean startNow) {
+        List<RenderSegment> copiedSegments = List.copyOf(segments);
+        createExportSettings(null, config).thenAccept(settings -> {
+            if (settings == null) {
+                return;
+            }
+
+            boolean started = switch (mode) {
+                case NORMAL -> false;
+                case SEPARATE_CLIPS -> RenderSegmentExportCoordinator.startOrQueueSeparateClips(settings, copiedSegments, startNow);
+                case STITCHED_VIDEO -> RenderSegmentExportCoordinator.startOrQueueStitchedVideo(settings, copiedSegments, startNow);
+            };
+
+            if (started) {
+                close = true;
+                Utils.exportSequenceCount += copiedSegments.size();
+                config.delayedSaveToDefaultFolder();
+            }
+        });
     }
 
     @Unique
