@@ -38,8 +38,8 @@ public final class FlashbackExtras implements ClientModInitializer {
                 long window = client.getWindow().handle();
                 boolean rightAltDown = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_RIGHT_ALT) == GLFW.GLFW_PRESS;
 
-                if (rightAltDown && client.screen == null) {
-                    client.setScreen(new FlashbackExtrasConfigScreen(null));
+                if (rightAltDown && client.gui.screen() == null) {
+                    client.gui.setScreen(new FlashbackExtrasConfigScreen(null));
                 }
             }
         });

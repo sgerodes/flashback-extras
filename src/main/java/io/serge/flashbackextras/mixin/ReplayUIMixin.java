@@ -26,7 +26,7 @@ public abstract class ReplayUIMixin {
         if (!FlashbackExtrasConfig.isExportCropGuideEnabled()) {
             return;
         }
-        if (Minecraft.getInstance().screen != null || Minecraft.getInstance().getOverlay() != null) {
+        if (Minecraft.getInstance().gui.screen() != null || Minecraft.getInstance().gui.overlay() != null) {
             return;
         }
         if (!Flashback.isInReplay() || frameWidth <= 1 || frameHeight <= 1) {

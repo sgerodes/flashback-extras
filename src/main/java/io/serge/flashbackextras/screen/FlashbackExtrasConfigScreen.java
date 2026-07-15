@@ -97,7 +97,7 @@ public final class FlashbackExtrasConfigScreen extends Screen {
     public void onClose() {
         FlashbackExtrasConfig.save();
         if (this.minecraft != null) {
-            this.minecraft.setScreen(this.parent);
+            this.minecraft.gui.setScreen(this.parent);
         }
     }
 
