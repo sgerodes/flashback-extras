@@ -91,6 +91,6 @@ jobs:
           changelog-file: CHANGELOG.md
           loaders: fabric
           game-versions: |
-            26.2
+            26.3
           dependencies: |
             flashback(required){modrinth:A7t2en6T}

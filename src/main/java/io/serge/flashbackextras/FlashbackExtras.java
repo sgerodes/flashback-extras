@@ -9,7 +9,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +22,8 @@ public final class FlashbackExtras implements ClientModInitializer {
 
     private static final KeyMapping OPEN_MENU_KEYBIND = KeyMappingHelper.registerKeyMapping(new KeyMapping(
         "flashbackextras.keybind.open_menu",
-        InputConstants.Type.KEYSYM,
-        GLFW.GLFW_KEY_P,
+        InputConstants.Type.KEYBOARD,
+        InputConstants.KEY_P,
         KEYBIND_CATEGORY
     ));
 
@@ -35,8 +34,7 @@ public final class FlashbackExtras implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (OPEN_MENU_KEYBIND.consumeClick()) {
-                long window = client.getWindow().handle();
-                boolean rightAltDown = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_RIGHT_ALT) == GLFW.GLFW_PRESS;
+                boolean rightAltDown = InputConstants.isKeyDown(InputConstants.KEY_RALT);
 
                 if (rightAltDown && client.gui.screen() == null) {
                     client.gui.setScreen(new FlashbackExtrasConfigScreen(null));
