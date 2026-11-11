@@ -39,9 +39,17 @@ public abstract class StartExportWindowMixin {
             target = "Lcom/moulberry/flashback/editor/ui/ImGuiHelper;separatorWithText(Ljava/lang/String;)V",
             ordinal = 0,
             shift = At.Shift.BEFORE
-        )
+        ),
+        cancellable = true
     )
     private static void flashbackExtras$renderExportPresets(CallbackInfo ci) {
+        if (ExportCapabilityWarmup.getStatus() == Status.RUNNING) {
+            ImGui.textDisabled(I18n.get("flashbackextras.export_warmup.preparing"));
+            ImGuiHelper.endPopupModalCloseable();
+            ci.cancel();
+            return;
+        }
+
         if (!FlashbackExtrasConfig.isExportPresetsEnabled()) {
             return;
         }
@@ -116,11 +124,6 @@ public abstract class StartExportWindowMixin {
         }
         if (!hasSelection) {
             ImGui.endDisabled();
-        }
-
-        Status warmupStatus = ExportCapabilityWarmup.getStatus();
-        if (warmupStatus == Status.SCHEDULED || warmupStatus == Status.RUNNING) {
-            ImGui.textDisabled(I18n.get("flashbackextras.export_warmup.preparing"));
         }
 
         if (ImGui.beginPopup(FLASHBACK_EXTRAS_SAVE_PRESET_POPUP)) {
