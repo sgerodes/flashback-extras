@@ -11,7 +11,10 @@
     "SoundManagerAccessor",
     "TimelineWindowMixin",
     "TimelineWindowAudioMixin",
-    "StartExportWindowMixin"
+    "StartExportWindowMixin",
+    "PixelFormatHelperMixin",
+    "VideoCodecMixin",
+    "VideoContainerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
