@@ -5,10 +5,13 @@ import com.moulberry.flashback.combo_options.VideoCodec;
 import com.moulberry.flashback.combo_options.VideoContainer;
 import com.moulberry.flashback.configuration.FlashbackConfigV1;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
 public final class ExportPreset {
+    private static final Field VIDEO_ENCODER_FIELD = findVideoEncoderField();
+
     private boolean builtIn;
     private String name;
     private int[] resolution = new int[]{1920, 1080};
@@ -19,6 +22,7 @@ public final class ExportPreset {
     private VideoContainer container;
     private VideoCodec videoCodec;
     private int selectedVideoEncoder;
+    private String videoEncoderName;
     private boolean useMaximumBitrate;
     private boolean recordAudio;
     private boolean transparentBackground;
@@ -80,7 +84,7 @@ public final class ExportPreset {
         preset.noGui = config.noGui;
         preset.container = config.container;
         preset.videoCodec = config.videoCodec;
-        preset.selectedVideoEncoder = config.selectedVideoEncoder != null && config.selectedVideoEncoder.length > 0 ? config.selectedVideoEncoder[0] : 0;
+        preset.captureVideoEncoder(config);
         preset.useMaximumBitrate = config.useMaximumBitrate;
         preset.recordAudio = config.recordAudio;
         preset.transparentBackground = config.transparentBackground;
@@ -100,13 +104,51 @@ public final class ExportPreset {
         config.noGui = this.noGui;
         config.container = this.container;
         config.videoCodec = this.videoCodec;
-        config.selectedVideoEncoder = new int[]{this.selectedVideoEncoder};
+        this.applyVideoEncoder(config);
         config.useMaximumBitrate = this.useMaximumBitrate;
         config.recordAudio = this.recordAudio;
         config.transparentBackground = this.transparentBackground;
         config.audioCodec = this.audioCodec;
         config.stereoAudio = this.stereoAudio;
         config.defaultExportPath = this.defaultExportPath;
+    }
+
+    private static Field findVideoEncoderField() {
+        try {
+            return FlashbackConfigV1.SubcategoryInternalExport.class.getField("selectedVideoEncoder");
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException("Flashback's export config is missing selectedVideoEncoder", e);
+        }
+    }
+
+    private void captureVideoEncoder(FlashbackConfigV1.SubcategoryInternalExport config) {
+        try {
+            Object encoder = VIDEO_ENCODER_FIELD.get(config);
+            if (encoder instanceof String name) {
+                this.videoEncoderName = name;
+            } else if (encoder instanceof int[] index && index.length > 0) {
+                this.selectedVideoEncoder = index[0];
+            }
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException("Could not read Flashback's selected video encoder", e);
+        }
+    }
+
+    private void applyVideoEncoder(FlashbackConfigV1.SubcategoryInternalExport config) {
+        try {
+            if (VIDEO_ENCODER_FIELD.getType() == String.class) {
+                // Legacy indices depended on which encoders were available when the preset was saved.
+                VIDEO_ENCODER_FIELD.set(config, this.videoEncoderName);
+            } else {
+                int index = this.selectedVideoEncoder;
+                if (this.videoEncoderName != null && this.videoCodec != null) {
+                    index = Math.max(0, Arrays.asList(this.videoCodec.getEncoders()).indexOf(this.videoEncoderName));
+                }
+                VIDEO_ENCODER_FIELD.set(config, new int[]{index});
+            }
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException("Could not set Flashback's selected video encoder", e);
+        }
     }
 
     public boolean builtIn() {
